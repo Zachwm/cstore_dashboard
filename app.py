@@ -12,8 +12,9 @@ st.title("Cstore Dashboard - Idaho Stores")
 # Load Data
 @st.cache_data
 def load_data():
-    fs = gcsfs.GCSFileSystem(project='vibrant-keyword-481505-f4')
-    with fs.open('gs://cstore_sample_dashboard_data/cstore_idaho.csv') as f:
+    # Cloud Run service account automatically handles authentication
+    fs = gcsfs.GCSFileSystem(project="vibrant-keyword-481505-f4")
+    with fs.open("gs://cstore_sample_dashboard_data/cstore_idaho.csv") as f:
         df = pl.read_csv(
             f,
             try_parse_dates=True,
@@ -31,6 +32,7 @@ try:
 except Exception as e:
     st.error(f"Error loading data: {str(e)}")
     st.stop()
+
 
 # Sidebar filters
 st.sidebar.header("Filters")

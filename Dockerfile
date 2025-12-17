@@ -17,5 +17,5 @@ COPY . /app
 # Expose port Cloud Run expects
 EXPOSE 8080
 
-# Default command
-CMD ["bash", "-c", "streamlit run app.py --server.address=0.0.0.0 --server.port=${PORT:-8051}"]
+# Default command: listen on $PORT set by Cloud Run
+CMD ["bash", "-c", "streamlit run app.py --server.address=0.0.0.0 --server.port=${PORT}"]
