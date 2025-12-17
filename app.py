@@ -12,7 +12,6 @@ st.title("Cstore Dashboard - Idaho Stores")
 # Load Data
 @st.cache_data
 def load_data():
-    # Cloud Run service account automatically handles authentication
     fs = gcsfs.GCSFileSystem(project="vibrant-keyword-481505-f4")
     with fs.open("gs://cstore_sample_dashboard_data/cstore_idaho.csv") as f:
         df = pl.read_csv(
@@ -28,7 +27,9 @@ def load_data():
     return df
 
 try:
+    print("Starting to load CSV from GCS...")
     df = load_data()
+    print("CSV loaded successfully")
 except Exception as e:
     st.error(f"Error loading data: {str(e)}")
     st.stop()
