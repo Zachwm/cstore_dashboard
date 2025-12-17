@@ -1,0 +1,8 @@
+streamlit == 1.52.1
+polars == 1.33.1
+plotly == 6.3.0
+great-tables == 0.20.0
+gcsfs == 2025.12.0
+pandas == 2.2.3
+pyarrow == 21.0.0
+google-cloud-storage == 3.7.0
