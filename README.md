@@ -1,5 +1,7 @@
 # How to Run
 
+Live Demo: https://cstore-dashboard-178610202074.us-west3.run.app
+
 ## 1. Build the Docker Image
 
 Run the following command in your project directory:
