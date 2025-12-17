@@ -6,6 +6,10 @@ import plotly.graph_objects as go
 from great_tables import GT
 import gcsfs
 
+import os
+os.environ["STREAMLIT_SERVER_WEBSOCKET_COMPRESSION"] = "false"
+
+
 st.set_page_config(page_title="Cstore Dashboard", layout="wide")
 st.title("Cstore Dashboard - Idaho Stores")
 
