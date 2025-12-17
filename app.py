@@ -9,22 +9,26 @@ import gcsfs
 st.set_page_config(page_title="Cstore Dashboard", layout="wide")
 st.title("Cstore Dashboard - Idaho Stores")
 
-# Load Data
-@st.cache_data
+@st.cache_data(show_spinner="Loading data from GCS...")
 def load_data():
-    fs = gcsfs.GCSFileSystem(project="vibrant-keyword-481505-f4")
-    with fs.open("gs://cstore_sample_dashboard_data/cstore_idaho.csv") as f:
-        df = pl.read_csv(
-            f,
-            try_parse_dates=True,
-            schema_overrides={
-                "TRANSACTION_ITEM_ID": pl.Utf8,
-                "TRANSACTION_SET_ID": pl.Utf8,
-                "STORE_ID": pl.Utf8,
-                "GTIN": pl.Utf8
-            }
-        )
-    return df
+    try:
+        fs = gcsfs.GCSFileSystem()  # use ADC on Cloud Run
+        with fs.open("gs://cstore_sample_dashboard_data/cstore_idaho.csv", "rb") as f:
+            df = pl.read_csv(
+                f,
+                try_parse_dates=True,
+                schema_overrides={
+                    "TRANSACTION_ITEM_ID": pl.Utf8,
+                    "TRANSACTION_SET_ID": pl.Utf8,
+                    "STORE_ID": pl.Utf8,
+                    "GTIN": pl.Utf8,
+                }
+            )
+        return df
+    except Exception as e:
+        st.error("Failed to load data from GCS")
+        st.exception(e)
+        st.stop()
 
 try:
     print("Starting to load CSV from GCS...")
@@ -70,12 +74,14 @@ df_filtered = df.filter(
 st.sidebar.metric("Total Transactions", f"{df_filtered.height:,}")
 
 # Tabs
-tab1, tab2, tab3, tab4 = st.tabs([
-    "Top Products (Weekly)",
-    "Beverage Brands",
-    "Cash vs Credit",
-    "Demographics"
-])
+with st.expander("Load dashboard", expanded=True):
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "Top Products (Weekly)",
+        "Beverage Brands",
+        "Cash vs Credit",
+        "Demographics"
+    ])
+
 
 # Tab 1: Top 5 Products by Week
 
