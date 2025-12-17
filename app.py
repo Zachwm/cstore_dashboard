@@ -173,21 +173,6 @@ with tab2:
             with metric_cols[2]:
                 st.metric("Unique Brands", f"{unique_brands}")
         
-        with st.expander("View Detailed Weekly Breakdown", expanded=False):
-            weekly_brands = (
-                beverages
-                .with_columns(
-                    pl.col("TRANSACTION_DATE").dt.truncate("1w").alias("WEEK")
-                )
-                .group_by(["WEEK", "BRAND"])
-                .agg([
-                    pl.sum("QUANTITY").alias("Total_Quantity"),
-                    pl.sum("TOTAL_SALE").alias("Total_Sales")
-                ])
-                .sort(["WEEK", "Total_Quantity"], descending=[False, True])
-            )
-            st.dataframe(weekly_brands.to_pandas(), width="stretch")
-        
         brand_sales = (
             beverages.group_by("BRAND")
             .agg([
@@ -253,7 +238,7 @@ with tab2:
             col_left, col_right = st.columns(2)
             
             with col_left:
-                st.subheader("🔝 Top 10 Brands")
+                st.subheader("Top 10 Brands")
                 brand_sales_sorted = brand_sales.sort("Total_Sales", descending=True)
                 
                 gt_brand_rev = (
@@ -278,7 +263,7 @@ with tab2:
                 st.plotly_chart(fig, width="stretch")
             
             with col_right:
-                st.subheader("📉 Bottom 10 Brands")
+                st.subheader("Bottom 10 Brands")
                 bottom_brands_rev = brand_sales_sorted.tail(10).sort("Total_Sales", descending=False)
                 
                 gt_brand_bottom_rev = (
@@ -411,6 +396,65 @@ with tab3:
         
         fig.update_layout(xaxis_tickangle=-45, height=400)
         st.plotly_chart(fig, width="stretch")
+    
+    st.subheader("Most Purchased Items by Payment Type")
+    st.caption("Top 10 items for each payment method (excluding fuel)")
+    
+    top_items_by_payment = (
+        df_filtered
+        .filter(
+            (pl.col("PAYMENT_TYPE").is_in(["CASH", "CREDIT", "EBT", "DEBIT"])) &
+            (pl.col("CATEGORY") != "Fuel") &
+            (pl.col("ITEM_NAME").is_not_null()) &
+            (pl.col("ITEM_NAME") != "") &
+            (pl.col("ITEM_NAME") != "null")
+        )
+        .group_by(["PAYMENT_TYPE", "ITEM_NAME"])
+        .agg(pl.sum("QUANTITY").alias("Total_Quantity"))
+        .sort(["PAYMENT_TYPE", "Total_Quantity"], descending=[False, True])
+    )
+    
+    # Get top 10 items per payment type
+    top_10_per_payment = (
+        top_items_by_payment
+        .with_columns(
+            pl.col("Total_Quantity").rank("dense", descending=True).over("PAYMENT_TYPE").alias("rank")
+        )
+        .filter(pl.col("rank") <= 10)
+        .drop("rank")
+    )
+    
+    # Create a 2x2 grid for the payment types
+    payment_types = top_10_per_payment.select("PAYMENT_TYPE").unique().sort("PAYMENT_TYPE").to_series().to_list()
+    
+    cols_per_row = 2
+    num_rows = (len(payment_types) + cols_per_row - 1) // cols_per_row
+    
+    for row_idx in range(num_rows):
+        cols = st.columns(cols_per_row)
+        for col_idx in range(cols_per_row):
+            payment_idx = row_idx * cols_per_row + col_idx
+            if payment_idx < len(payment_types):
+                payment_type = payment_types[payment_idx]
+                
+                payment_data = (
+                    top_10_per_payment
+                    .filter(pl.col("PAYMENT_TYPE") == payment_type)
+                    .sort("Total_Quantity", descending=False)
+                    .to_pandas()
+                )
+                
+                with cols[col_idx]:
+                    color_map = {'CASH': '#2ca02c', 'CREDIT': '#1f77b4', 'DEBIT': '#ff7f0e', 'EBT': '#d62728'}
+                    fig = px.bar(payment_data, 
+                                 x='Total_Quantity', 
+                                 y='ITEM_NAME',
+                                 title=f'{payment_type}',
+                                 labels={'ITEM_NAME': 'Product', 'Total_Quantity': 'Quantity'},
+                                 height=400,
+                                 color_discrete_sequence=[color_map.get(payment_type, '#1f77b4')])
+                    fig.update_layout(showlegend=False, margin=dict(l=10, r=10, t=40, b=10))
+                    st.plotly_chart(fig, use_container_width=True)
 
 # Tab 4: Census Data
 

@@ -1,12 +1,31 @@
-# How to run
+# How to Run
 
-## Build the Docker image
-docker build -t my-python-app .
+## 1. Build the Docker Image
 
-## Run the container
-docker run -p 8051:8051 -v "${PWD}/vibrant-keyword-481505-f4-dd23afe5a12d.json:/key.json" -e GOOGLE_APPLICATION_CREDENTIALS=/key.json my-python-app
+Run the following command in your project directory:
 
-This also mounts a key that in the real would everyone would have their own and would not be in the repo.
+    docker build -t my-python-app .
 
-## Then open in browser:
-http://localhost:8051
+---
+
+## 2. Run the Container
+
+To access the data, you must have a service account key from the owner.  
+
+1. Place the key in the project directory and name it:
+
+    google_authentication.json
+
+2. Run the container with the key mounted and environment variable set:
+
+    docker run -p 8051:8051 -v "${PWD}/google_authentication.json:/key.json" -e GOOGLE_APPLICATION_CREDENTIALS=/key.json my-python-app
+
+> **Important:** Do **not** commit `google_authentication.json` to GitHub, the key gets deactiveted when exposed.
+
+---
+
+## 3. Open the App in Your Browser
+
+Once the container is running, visit:
+
+    http://localhost:8051
