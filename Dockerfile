@@ -16,5 +16,5 @@ RUN pip install --no-cache-dir --upgrade pip \
 EXPOSE 8080
 
 # Use the PORT environment variable
-CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.enableCORS=false"]
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0"]
 
