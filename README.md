@@ -18,7 +18,7 @@ To access the data, you must have a service account key from the owner.
 
 2. Run the container with the key mounted and environment variable set:
 
-        docker run -p 8051:8051 -v "${PWD}/google_authentication.json:/key.json" -e GOOGLE_APPLICATION_CREDENTIALS=/key.json -e PORT=8051 cstore-dashboard
+        docker run -p 8080:8080 -v "${PWD}/google_authentication.json:/key.json" -e GOOGLE_APPLICATION_CREDENTIALS=/key.json -e PORT=8080 cstore-dashboard
 
 **Important:** Do **not** commit `google_authentication.json` to GitHub, the key gets deactiveted when exposed.
 
@@ -28,4 +28,4 @@ To access the data, you must have a service account key from the owner.
 
 Once the container is running, visit:
 
-    http://localhost:8051
+    http://localhost:8080

@@ -4,9 +4,9 @@ services:
   streamlit:
     build: .
     ports:
-      - "8501:8501"  # Local mapping
+      - "8080:8080"  # Local mapping
     volumes:
       - .:/app
     environment:
       - STREAMLIT_SERVER_HEADLESS=true
-      - PORT=8501      # Local override for docker-compose
+      - PORT=8080      # Local override for docker-compose
